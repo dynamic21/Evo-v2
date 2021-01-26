@@ -103,14 +103,15 @@ public:
                 weights[i] += (randomDouble() * 2 - 1) * mutationAmplitude;
             }
         }
-        if (randomDouble() < mutationRate)
-        {
-            mutationRate += (randomDouble() * 2 - 1) * mutationAmplitude;
-        }
-        if (randomDouble() < mutationRate)
-        {
-            mutationAmplitude += (randomDouble() * 2 - 1) * mutationAmplitude;
-        }
+        // maybe these shouldn't be mutated by tha agent, let species mutation do it
+        // if (randomDouble() < mutationRate)
+        // {
+        //     mutationRate += (randomDouble() * 2 - 1) * mutationAmplitude;
+        // }
+        // if (randomDouble() < mutationRate)
+        // {
+        //     mutationAmplitude += (randomDouble() * 2 - 1) * mutationAmplitude;
+        // }
     }
 };
 
