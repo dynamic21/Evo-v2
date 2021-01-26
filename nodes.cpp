@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <ctime>
-#define defaultMutationRate 0.5
+#define defaultMutationRate 0.8
 #define defaultMutationAmplitude 0.1
 
 using namespace std;
@@ -21,7 +21,7 @@ public:
     double memory;
     double mutationRate;
     double mutationAmplitude;
-    int bias;
+    double bias;
     int numberOfConnections;
     vector<int> connections;
     vector<double> weights;
@@ -143,7 +143,7 @@ public:
         {
             node newNode;
             newNode.initialize({(i + 1) % numberOfNodes}, defaultMutationRate, defaultMutationAmplitude);
-            // newNode.mutate();
+            newNode.mutate();
             nodes.push_back(newNode);
         }
     }
@@ -175,10 +175,10 @@ public:
             {
                 for (int j = 0; j < nodes[i].numberOfConnections; j++)
                 {
-                    int connectionNumber = nodes[i].connections[j];
-                    double sum = nodes[i].memory * nodes[i].weights[connectionNumber];
+                    double sum = nodes[i].memory * nodes[i].weights[j];
                     if (sum >= 0)
                     {
+                        int connectionNumber = nodes[i].connections[j];
                         nodes[connectionNumber].futureMemory += sum;
                         nodes[connectionNumber].currentStateActive = true;
                     }
@@ -209,6 +209,18 @@ public:
 };
 
 // remember to factory reset the agents before use
+
+// void timeFunction()
+// {
+//     clock_t start = clock();
+//     int a = 2;
+//     for (int i = 0; i < 10000000; i++)
+//     {
+//         int b = 3;
+//         a = b;
+//     }
+//     cout << "Time: " << (clock() - start) / (double)(CLOCKS_PER_SEC / 1000) << " ms" << endl;
+// }
 
 int main()
 {
