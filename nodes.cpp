@@ -88,21 +88,13 @@ public:
 
     void mutate()
     {
-        if (randomDouble() < mutationRate)
-        {
-            defaultMemory += (randomDouble() * 2 - 1) * mutationAmplitude;
-        }
-        if (randomDouble() < mutationRate)
-        {
-            bias += (randomDouble() * 2 - 1) * mutationAmplitude;
-        }
+        defaultMemory += (randomDouble() * 2 - 1) * mutationAmplitude;
+        bias += (randomDouble() * 2 - 1) * mutationAmplitude;
         for (int i = 0; i < numberOfConnections; i++)
         {
-            if (randomDouble() < mutationRate)
-            {
-                weights[i] += (randomDouble() * 2 - 1) * mutationAmplitude;
-            }
+            weights[i] += (randomDouble() * 2 - 1) * mutationAmplitude;
         }
+        // maybe don't use mutationRate for the basic agent mutations, have them used in species mutation
         // maybe these shouldn't be mutated by tha agent, let species mutation do it
         // if (randomDouble() < mutationRate)
         // {
