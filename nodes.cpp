@@ -14,7 +14,10 @@ double randomDouble()
 class node
 {
 public:
-    double preMemory;
+    bool currentStateActive;
+    bool previousStateActive;
+    double defaultMemory;
+    double futureMemory;
     double memory;
     double mutationRate;
     double mutationAmplitude;
@@ -23,61 +26,12 @@ public:
     vector<int> connections;
     vector<double> weights;
 
-    void initialize(vector<int> givenConnections, double givenmutationRate, double givenMutationAmplitude)
-    {
-        mutationRate = givenmutationRate;
-        mutationAmplitude = givenMutationAmplitude;
-        numberOfConnections = givenConnections.size();
-        for (int i = 0; i < numberOfConnections; i++)
-        {
-            connections.push_back(givenConnections[i]);
-            weights.push_back(0);
-        }
-    }
-
-    void mutate()
-    {
-        if (randomDouble() < mutationRate)
-        {
-            mutationRate += (randomDouble() * 2 - 1) * mutationAmplitude;
-        }
-        if (randomDouble() < mutationRate)
-        {
-            mutationAmplitude += (randomDouble() * 2 - 1) * mutationAmplitude;
-        }
-        if (randomDouble() < mutationRate)
-        {
-            bias += (randomDouble() * 2 - 1) * mutationAmplitude;
-        }
-        for (int i = 0; i < numberOfConnections; i++)
-        {
-            if (randomDouble() < mutationRate)
-            {
-                weights[i] += (randomDouble() * 2 - 1) * mutationAmplitude;
-            }
-        }
-    }
-
-    node copy()
-    {
-        node newNode;
-        newNode.preMemory = preMemory;
-        newNode.memory = memory;
-        newNode.mutationRate = mutationRate;
-        newNode.mutationAmplitude = mutationAmplitude;
-        newNode.bias = bias;
-        newNode.numberOfConnections = numberOfConnections;
-        for (int i = 0; i < numberOfConnections; i++)
-        {
-            newNode.connections.push_back(connections[i]);
-            newNode.weights.push_back(weights[i]);
-        }
-        return newNode;
-    }
-
     void info()
     {
-        cout << "preMemory: " << preMemory << endl;
+        cout << "currentStateActive: " << currentStateActive << endl;
+        cout << "previousStateActive: " << previousStateActive << endl;
+        cout << "defaultMemory: " << defaultMemory << endl;
+        cout << "futureMemory: " << futureMemory << endl;
         cout << "memory: " << memory << endl;
         cout << "mutationRate: " << mutationRate << endl;
         cout << "mutationAmplitude: " << mutationAmplitude << endl;
@@ -96,26 +50,77 @@ public:
         }
         cout << endl;
     }
+
+    void initialize(vector<int> givenConnections, double givenmutationRate, double givenMutationAmplitude)
+    {
+        currentStateActive = true;
+        defaultMemory = 0;
+        bias = 0;
+        mutationRate = givenmutationRate;
+        mutationAmplitude = givenMutationAmplitude;
+        numberOfConnections = givenConnections.size();
+        for (int i = 0; i < numberOfConnections; i++)
+        {
+            connections.push_back(givenConnections[i]);
+            weights.push_back(0);
+        }
+    }
+
+    node copy()
+    {
+        node newNode;
+        newNode.currentStateActive = currentStateActive;
+        newNode.previousStateActive = previousStateActive;
+        newNode.defaultMemory = defaultMemory;
+        newNode.futureMemory = futureMemory;
+        newNode.memory = memory;
+        newNode.mutationRate = mutationRate;
+        newNode.mutationAmplitude = mutationAmplitude;
+        newNode.bias = bias;
+        newNode.numberOfConnections = numberOfConnections;
+        for (int i = 0; i < numberOfConnections; i++)
+        {
+            newNode.connections.push_back(connections[i]);
+            newNode.weights.push_back(weights[i]);
+        }
+        return newNode;
+    }
+
+    void mutate()
+    {
+        if (randomDouble() < mutationRate)
+        {
+            defaultMemory += (randomDouble() * 2 - 1) * mutationAmplitude;
+        }
+        if (randomDouble() < mutationRate)
+        {
+            bias += (randomDouble() * 2 - 1) * mutationAmplitude;
+        }
+        for (int i = 0; i < numberOfConnections; i++)
+        {
+            if (randomDouble() < mutationRate)
+            {
+                weights[i] += (randomDouble() * 2 - 1) * mutationAmplitude;
+            }
+        }
+        if (randomDouble() < mutationRate)
+        {
+            mutationRate += (randomDouble() * 2 - 1) * mutationAmplitude;
+        }
+        if (randomDouble() < mutationRate)
+        {
+            mutationAmplitude += (randomDouble() * 2 - 1) * mutationAmplitude;
+        }
+    }
 };
 
 class agent
 {
 public:
+    int numberOfInputNodes;
+    int numberOfOutputNodes;
     int numberOfNodes;
     vector<node> nodes;
-
-    void initialize(int numberOdInputs, int numberOfOutputs)
-    {
-        int i;
-        numberOfNodes = numberOdInputs + numberOfOutputs;
-        for (i = 0; i < numberOfNodes; i++)
-        {
-            node newNode;
-            newNode.initialize({(i + 1) % numberOfNodes}, defaultMutationRate, defaultMutationAmplitude);
-            newNode.mutate();
-            nodes.push_back(newNode);
-        }
-    }
 
     void info()
     {
@@ -128,7 +133,82 @@ public:
             cout << endl;
         }
     }
+
+    void initialize(int numberOfInputs, int numberOfOutputs)
+    {
+        numberOfInputNodes = numberOfInputs;
+        numberOfOutputNodes = numberOfOutputs;
+        numberOfNodes = numberOfInputs + numberOfOutputs;
+        for (int i = 0; i < numberOfNodes; i++)
+        {
+            node newNode;
+            newNode.initialize({(i + 1) % numberOfNodes}, defaultMutationRate, defaultMutationAmplitude);
+            // newNode.mutate();
+            nodes.push_back(newNode);
+        }
+    }
+
+    void factoryReset()
+    {
+        for (int i = 0; i < numberOfNodes; i++)
+        {
+            nodes[i].currentStateActive = true;
+            nodes[i].memory = nodes[i].defaultMemory;
+        }
+    }
+
+    vector<double> evaluate(vector<int> givenInput)
+    {
+        for (int i = 0; i < numberOfInputNodes; i++)
+        {
+            nodes[i].memory += givenInput[i];
+        }
+        for (int i = 0; i < numberOfNodes; i++)
+        {
+            nodes[i].previousStateActive = nodes[i].currentStateActive;
+            nodes[i].currentStateActive = false;
+            nodes[i].futureMemory = 0;
+        }
+        for (int i = 0; i < numberOfNodes; i++)
+        {
+            if (nodes[i].previousStateActive)
+            {
+                for (int j = 0; j < nodes[i].numberOfConnections; j++)
+                {
+                    int connectionNumber = nodes[i].connections[j];
+                    double sum = nodes[i].memory * nodes[i].weights[connectionNumber];
+                    if (sum >= 0)
+                    {
+                        nodes[connectionNumber].futureMemory += sum;
+                        nodes[connectionNumber].currentStateActive = true;
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < numberOfNodes; i++)
+        {
+            if (nodes[i].currentStateActive)
+            {
+                nodes[i].memory = nodes[i].futureMemory + nodes[i].bias;
+            }
+        }
+        vector<double> output;
+        for (int i = numberOfInputNodes; i < numberOfInputNodes + numberOfOutputNodes; i++)
+        {
+            if (nodes[i].currentStateActive)
+            {
+                output.push_back(nodes[i].memory);
+            }
+            else
+            {
+                output.push_back(0);
+            }
+        }
+        return output;
+    }
 };
+
+// remember to factory reset the agents before use
 
 int main()
 {
@@ -137,7 +217,16 @@ int main()
 
     agent newAgent;
     newAgent.initialize(3, 2);
+    newAgent.factoryReset();
+    vector<double> output = newAgent.evaluate({0, 0, 0});
+    for (int i = 0; i < output.size(); i++)
+    {
+        cout << output[i] << " ";
+    }
+    cout << endl
+         << endl;
     newAgent.info();
+
     int done;
     cout << "Enter Any Key To Exit: " << endl;
     cin >> done;
