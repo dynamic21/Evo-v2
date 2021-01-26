@@ -1,7 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <ctime>
-#define defaultMutationRate 0.8
+#define defaultMutationRate 0.4
 #define defaultMutationAmplitude 0.1
 
 using namespace std;
@@ -229,6 +229,18 @@ public:
         }
         return output;
     }
+};
+
+class specie
+{
+public:
+    vector<agent> agents;
+};
+
+class world
+{
+public:
+    vector<specie> species;
 };
 
 // remember to factory reset the agents before use
