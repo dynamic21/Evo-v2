@@ -234,12 +234,14 @@ public:
 class specie
 {
 public:
+    int numberOfAgents;
     vector<agent> agents;
 };
 
 class world
 {
 public:
+    int numberOfSpecies;
     vector<specie> species;
 };
 
