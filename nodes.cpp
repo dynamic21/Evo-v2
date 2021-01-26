@@ -236,6 +236,11 @@ class specie
 public:
     int numberOfAgents;
     vector<agent> agents;
+
+    void initialize()
+    {
+        //
+    }
 };
 
 class world
