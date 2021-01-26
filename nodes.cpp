@@ -140,13 +140,43 @@ public:
         numberOfInputNodes = numberOfInputs;
         numberOfOutputNodes = numberOfOutputs;
         numberOfNodes = numberOfInputs + numberOfOutputs;
+        vector<int> inputConnections;
+        vector<int> outputConnections;
+        for (int i = 0; i < numberOfInputs; i++)
+        {
+            inputConnections.push_back(i);
+        }
+        for (int i = numberOfInputs; i < numberOfNodes; i++)
+        {
+            outputConnections.push_back(i);
+        }
         for (int i = 0; i < numberOfNodes; i++)
         {
             node newNode;
-            newNode.initialize({(i + 1) % numberOfNodes}, defaultMutationRate, defaultMutationAmplitude);
+            if (i < numberOfInputs)
+            {
+                newNode.initialize(outputConnections, defaultMutationRate, defaultMutationAmplitude);
+            }
+            else
+            {
+                newNode.initialize(inputConnections, defaultMutationRate, defaultMutationAmplitude);
+            }
             newNode.mutate();
             nodes.push_back(newNode);
         }
+    }
+
+    agent copy()
+    {
+        agent newAgent;
+        newAgent.numberOfInputNodes = numberOfInputNodes;
+        newAgent.numberOfOutputNodes = numberOfOutputNodes;
+        newAgent.numberOfNodes = numberOfNodes;
+        for (int i = 0; i < numberOfNodes; i++)
+        {
+            newAgent.nodes.push_back(nodes[i].copy());
+        }
+        return newAgent;
     }
 
     void factoryReset()
